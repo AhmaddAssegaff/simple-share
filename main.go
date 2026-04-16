@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"path/filepath"
 )
 
 type File struct {
@@ -79,6 +82,61 @@ func main() {
 	http.HandleFunc("/download/", func(w http.ResponseWriter, r *http.Request) {
 		file := r.URL.Path[len("/download/"):]
 		http.ServeFile(w, r, "./public/"+file)
+	})
+
+	http.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+		err := r.ParseMultipartForm(100 << 20)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		file, handler, err := r.FormFile("file")
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		defer file.Close()
+
+		dst, err := os.Create("./public/" + handler.Filename)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		defer dst.Close()
+
+		_, err = io.Copy(dst, file)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	})
+
+	http.HandleFunc("/delete/", func(w http.ResponseWriter, r *http.Request) {
+		file := r.URL.Path[len("/delete/"):]
+
+		decoded, err := url.PathUnescape(file)
+		if err != nil {
+			http.Error(w, "Invalid filename", 400)
+			return
+		}
+
+		filename := filepath.Base(decoded)
+
+		err = os.Remove("./public/" + filename)
+		if err != nil {
+			http.Error(w, "Gagal hapus file", 500)
+			return
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
 	ip := getLocalIP()

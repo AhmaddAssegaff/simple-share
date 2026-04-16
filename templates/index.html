@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>File Share</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-3">
+	<div class="w-full max-w-2xl bg-white rounded-2xl shadow-md p-4 sm:p-6">
+
+		<div class="text-center mb-5">
+			<h1 class="text-xl sm:text-2xl font-bold text-gray-800">File Sharing</h1>
+			<p class="text-xs sm:text-sm text-gray-500">Share file dalam satu jaringan</p>
+		</div>
+
+		<form action="/upload" method="POST" enctype="multipart/form-data"
+			class="flex flex-col sm:flex-row gap-2 mb-5">
+
+			<input type="file" name="file"
+				class="w-full text-sm text-gray-700
+				file:mr-2 file:py-2 file:px-3
+				file:rounded-lg file:border-0
+				file:text-sm file:font-semibold
+				file:bg-blue-50 file:text-blue-600
+				hover:file:bg-blue-100"/>
+
+			<button type="submit"
+				class="w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+				Upload
+			</button>
+		</form>
+
+		<div class="space-y-2">
+			{{range .}}
+			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+
+				<div class="flex-1">
+					<p class="font-medium text-gray-800 break-all">{{.Name}}</p>
+					<p class="text-xs text-gray-500">{{.Size}} bytes</p>
+				</div>
+
+				<div class="flex gap-2">
+					<a href="/download/{{.Name}}"
+						class="flex-1 text-center px-3 py-2 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600">
+						download
+					</a>
+
+					<a href="/delete/{{.Name}}"
+						class="flex-1 text-center px-3 py-2 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600">
+						delete
+					</a>
+				</div>
+
+			</div>
+			{{end}}
+		</div>
+
+	</div>
+
+</body>
+</html>
