@@ -10,7 +10,26 @@ import (
 
 type File struct {
 	Name string
-	Size int64
+	Size string
+}
+
+func formatSize(size int64) string {
+	const (
+		KB = 1024
+		MB = 1024 * KB
+		GB = 1024 * MB
+	)
+
+	switch {
+	case size >= GB:
+		return fmt.Sprintf("%.2f GB", float64(size)/GB)
+	case size >= MB:
+		return fmt.Sprintf("%.2f MB", float64(size)/MB)
+	case size >= KB:
+		return fmt.Sprintf("%.2f KB", float64(size)/KB)
+	default:
+		return fmt.Sprintf("%d B", size)
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +44,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		info, _ := f.Info()
 		fileList = append(fileList, File{
 			Name: f.Name(),
-			Size: info.Size(),
+			Size: formatSize(info.Size()),
 		})
 	}
 
